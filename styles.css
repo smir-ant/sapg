@@ -1,0 +1,258 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap&family=Nanum+Pen+Script&display=swap');
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --color-back: #f1f1f1;
+        --color-back_second: #fff;
+        --color-front: #231f20;
+        --color-trOdd: #EBEAE3;
+        --color-solved: #7cac6c;
+        --color-disabledNext: #C9C9C9;
+        --bordeRadius: 10px;
+    }
+    
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-back: #181A1B;
+        --color-back_second: #25282a;
+        --color-front: #F4F4F4;
+        --color-trOdd: #1d1d1f;
+        --color-solved: #4f7142;
+        --color-disabledNext: #040e0e;
+        --bordeRadius: 10px;
+    }
+    #github img {
+        filter: invert();
+    }
+}
+
+body {
+    color: var(--color-front);
+    background-color: var(--color-back);
+    font-family: "Montserrat", sans-serif;
+}
+
+main {
+    margin: 50px auto;
+    background-color: var(--color-back_second);
+    border-radius: var(--bordeRadius);
+    width: 70vw;
+    /* padding: 50px; */
+    padding: 30px 50px 50px;
+}
+
+hr {
+    margin-block: 50px;
+}
+
+a, a:visited {
+    text-decoration: none;
+    color: #3369D6
+}
+
+/* code у меня здесь это кодовые слова в задачах */
+code {
+    font-size: 1rem;
+}
+li:not(.color-solved):not(.disabled) code {
+    padding: 0 3px 2px;
+    border-bottom: 1px solid var(--color-front);
+}
+
+thead tr {
+    filter: drop-shadow(0px 0px 2px var(--color-front));
+
+}
+tr:nth-child(even), th {
+    background-color: var(--color-trOdd);
+}
+td, th {
+    padding: 4.5px 20px;
+    text-align: left;
+}
+
+
+#github img {
+    position: fixed;
+    z-index: 1;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+}
+
+
+/* ----- THEORY SECTION ----- */
+#sect_theory p {
+    text-align: justify;
+}
+
+
+
+/* ----- PRACTICE SECTION ----- */
+#sect_practice {
+    display: grid;
+      grid-template-areas:
+        "table task"
+        "code task";
+      grid-template-columns: 2fr 1fr;
+      grid-template-rows: auto 1fr;
+      gap: 10px;
+      height: fit-content;
+      margin-top: 25px;
+}
+/* Медиазапрос для мобильных устройств */
+@media (max-width: 768px) {
+    #sect_practice {
+        grid-template-areas: 
+            "table"
+            "code"
+            "task";
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+    }
+
+    main {
+        padding: 25px;
+        width: 80vw;
+    }
+}
+
+#group_table {
+    grid-area: table;
+    overflow-x: scroll;
+}
+#group_code {
+    grid-area: code;
+}
+#group_task {
+    grid-area: task;
+
+    border-radius: var(--bordeRadius);
+    background-color: var(--color-trOdd);
+    padding: 10px 20px;
+
+    & ol {
+        padding-left: 20px;
+    }
+
+    & li {
+        margin: 20px 0;
+    }
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    
+}
+
+#containerSQL {
+    height: 310px;
+    overflow-y: scroll;
+    border-radius: var(--bordeRadius);
+}
+
+#dataTable {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+
+#status {
+    margin: 10px 0 20px;
+    font-family: monospace;
+}
+
+.code {
+    font-family: monospace;
+    font-size: 1rem;
+
+    padding: 15px;
+    min-height: 120px;
+    height: fit-content;
+
+    overflow: auto;
+    white-space: pre-wrap; /* Перенос строки */
+    word-wrap: break-word; /* Перенос слов */
+
+}
+
+.code#colored {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+
+    /* запрет на выделение. а то выделяя копируются с тегами, ибо #colored выше находится и копируется из него */
+    -webkit-user-select: none; /* Для Safari */
+    -moz-user-select: none; /* Для Firefox */
+    -ms-user-select: none; /* Для Internet Explorer/Edge */
+    user-select: none; /* Стандартное свойство */
+}
+
+.code#sqlInput {
+    background-color: var(--color-back);
+    color: var(--color-front);
+
+    border-radius: var(--bordeRadius);
+    outline: none;
+}
+
+
+/* SQL keywords color */
+.highlight {
+    color: #3a79d7;
+
+}
+
+/* comment color + recolor keywords */
+.comment .highlight,
+.comment {
+    color: #6a737d;
+}
+
+li.disabled {
+    opacity: 0.2;
+}
+a.disabled {
+    pointer-events: none;
+}
+
+.solved {
+    color: var(--color-solved);
+}
+
+#finishBtn, #finishBtn:visited {
+    display: block;
+    margin-bottom: 10px;
+    border-radius: var(--bordeRadius);
+    height: 50px;
+    font-weight: 700;
+    background-color: #60B358;
+    color: #fff;
+    &.disabled {
+        background-color: var(--color-disabledNext);
+        color: var(--color-front);
+        opacity: 0.2;
+    };
+
+    /* выравнивание по центру */
+    display: grid;
+    place-items: center;
+}
+
+
+
+/* ------ Навигация ------ */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+#proj_name {
+    font-size: 4rem;
+    font-family: "Nanum Pen Script", cursive;
+    cursor: pointer;
+}

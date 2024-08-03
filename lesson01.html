@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task1</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <a id="github" href="https://github.com/smir-ant/postgreBolt"><img src="assets/github.svg" alt=""></a>
+    
+
+    <main>
+        <nav>
+            <a id="proj_name" href="index.html">SAPg</a>
+            <span>ЫЫЫЫЫ</span>
+        </nav>
+
+        <section id="sect_theory">
+            <h1>Урок 1. Выборка: основы.</h1>
+            <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Doloremque quisquam labore esse doloribus, a
+                sed voluptatibus obcaecati voluptatem aperiam laborum excepturi voluptas maiores perferendis culpa
+                quibusdam repellat cum ut. Dolorum aperiam aliquam inventore placeat repudiandae culpa delectus natus
+                sapiente ratione cumque at dignissimos rerum, porro dolores adipisci suscipit vero maxime.</p>
+            <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Doloremque quisquam labore esse doloribus, a
+                sed voluptatibus obcaecati voluptatem aperiam laborum excepturi voluptas maiores perferendis culpa
+                quibusdam repellat cum ut. Dolorum aperiam aliquam inventore placeat repudiandae culpa delectus natus
+                sapiente ratione cumque at dignissimos rerum, porro dolores adipisci suscipit vero maxime.</p>
+            <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Doloremque quisquam labore esse doloribus, a
+                sed voluptatibus obcaecati voluptatem aperiam laborum excepturi voluptas maiores perferendis culpa
+                quibusdam repellat cum ut. Dolorum aperiam aliquam inventore placeat repudiandae culpa delectus natus
+                sapiente ratione cumque at dignissimos rerum, porro dolores adipisci suscipit vero maxime.</p>
+        </section>
+
+        <hr>
+
+        <section id="sect_practice">
+            <section id="group_table">    
+                <div id="containerSQL">
+                    <table id="dataTable">
+                        <thead></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div id="status">Инициализация БД...</div>        
+            </section>
+
+            <section id="group_task">
+                <div class="container">
+                    <h3>Урок 1 – Задания</h3>
+                    <ol>
+                        <li>Find the <code>title</code> of each film</li>
+                        <li class="disabled">Find the <code>director</code> of each film</li>
+                        <li class="disabled">Find the <code>title</code> and <code>director</code> of each film</li>
+                        <li class="disabled">Find the <code>title</code> and <code>year</code> of each film</li>
+                        <li class="disabled">Find <code>all</code> the information about each film
+                        </li>
+                    </ol>
+                </div>
+                <a id="finishBtn" class="disabled" href="lesson02.html">Выполни задания выше</a>
+            </section>
+
+            <section id="group_code"> 
+                    <div id="colored" class="code"></div>
+                    <div id="sqlInput" class="code" contenteditable="true" spellcheck="false">SELECT * FROM tablename;</div>
+            </section>  
+
+        </section>
+    </main>
+
+
+
+    <script src="higlightSQL.js"> // подсветка sql кода самодельная | сама, highlightEl() </script>
+    <script src="isRightAns.js"> // проверка верный ли запрос под задание | вызывать, isRightAnswer() </script>
+    <script src="logo.js">  // имя проекта красивое </script>
+
+    <script type="module"> // вынужден оставлять js в html, иначе cors получается из-за wasm, как я понял  :(
+        const answers = [
+            "SELECT title FROM tablename;",
+            "SELECT director FROM tablename;",
+            "SELECT title, director FROM tablename;",
+            "SELECT title, year FROM tablename;",
+            "SELECT * FROM tablename;",
+        ]
+        import { PGlite } from "https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/index.js";
+
+        async function initializeDB(ddl) {
+            setStatus("Инициализация БД...");
+            db = new PGlite("idb://my-pgdata");
+            // т.к. тут всё кешируется, то сперва удаляем бд если была
+            await db.query('DROP TABLE IF EXISTS tablename;');
+
+            // создаём бд
+            await db.query(`CREATE TABLE tablename (
+            id SERIAL PRIMARY KEY, 
+            Title VARCHAR(255) NOT NULL, 
+            Director VARCHAR(255) NOT NULL, 
+            Year INT NOT NULL, 
+            Length_minutes INT NOT NULL);`);
+
+            // наполняем бд
+            await db.query(`INSERT INTO tablename (Title, Director, Year, Length_minutes) VALUES
+            ('Toy Story', 'John Lasseter', 1995, 81),
+            ('A Bug''s Life', 'John Lasseter', 1998, 95),
+            ('Toy Story 2', 'John Lasseter', 1999, 93),
+            ('Monsters, Inc.', 'Pete Docter', 2001, 92),
+            ('Finding Nemo', 'Andrew Stanton', 2003, 107),
+            ('The Incredibles', 'Brad Bird', 2004, 116),
+            ('Cars', 'John Lasseter', 2006, 117),
+            ('Ratatouille', 'Brad Bird', 2007, 115),
+            ('WALL-E', 'Andrew Stanton', 2008, 104),
+            ('WALL-E', 'Andrew Stanton', 2008, 104),
+            ('WALL-E', 'Andrew Stanton', 2008, 104),
+            ('WALL-E', 'Andrew Stanton', 2008, 104),
+            ('WALL-E', 'Andrew Stanton', 2008, 104),
+            ('WALL-E', 'Andrew Stanton', 2008, 104),
+            ('Up', 'Pete Docter', 2009, 101);`);
+            setStatus("БД инициализирована и таблица составлена.");
+            fetchTableData();
+        }
+        
+        const statusElement = document.getElementById('status');
+        const dataTable = document.getElementById('dataTable');
+        const sqlInput = document.getElementById('sqlInput');
+        const ddlInput = document.getElementById('ddlInput');
+        let db = null;
+        let stagedRows = [];
+
+        function setStatus(message) {
+            console.log(message);
+            statusElement.textContent = message;
+        }
+
+        async function fetchTableData() {
+            setStatus("Извлечение данных...");
+            const result = await db.query("SELECT * FROM tablename;");
+            populateTable(result.rows, result.fields);
+            setStatus(`БД готова к работе. Всего записей: ${result.rows.length}`);
+        }
+
+        function populateTable(rows, fields) {
+            dataTable.innerHTML = "<thead></thead><tbody></tbody>";  // очистка таблицы
+            dataTable.querySelector("thead").innerHTML = `<tr>${fields.map(field => `<th>${field.name}</th>`).join('')}</tr>`;  // th
+            rows.forEach(row => {
+                const rowHtml = `<tr>${fields.map(field => `<td>${row[field.name]}</td>`).join('')}</tr>`;  // td
+                dataTable.querySelector("tbody").innerHTML += rowHtml;
+            });
+        }
+
+
+        let error_translate = {
+            "syntax error at or near ": "синтаксическая ошибка возле ",
+            "argument of WHERE must be type boolean": "...",  // WHERE подаётся значение не bool
+            "operator does not exist: integer == inte": "...",  // два равно в where
+            "cannot insert multiple commands into a p": "...",  // несколько команд сразу
+        }
+        async function executeSQL() {
+            const sql = sqlInput.innerHTML.replaceAll('<div>', ' ')  // каждая строка тут это div
+                .replaceAll('</div>', '')
+                .replaceAll('<br>', '')
+                .replaceAll('&lt;', '<')
+                .replaceAll('&gt;', '>')
+                .replace(/(--.*$)/gm, '') // Удаляет однострочные комментарии
+                .replace(/\/\*[\s\S]*?\*\//gm, '') // Удаляет многострочные комментарии
+                // p.s. Когда мы используем регулярное выражение с флагом g (глобальный), метод replace заменяет все вхождения в строке, а не только первое
+                .trim();
+            console.log("НУ-КА:", sql);
+            if (!sql) {
+                setStatus("Введи SQL запрос.");
+                return;
+            }
+            setStatus(`Выполняем запрос: ${sql}`);
+            try {
+                const isSelectQuery = sql.toLowerCase().startsWith("select");
+                if (isSelectQuery) {
+                    const result = await db.query(sql);
+                    console.log("ПОЛУЧИЛИ", result);
+                    
+                    populateTable(result.rows, result.fields);
+                    setStatus(`Запрос выполнен. Вернуто ${result.rows.length} строк.`);
+
+                    // выполнили запрос, но проверим верный ли запрос по заданию
+                    const taskAnswer = await db.query(answers[currentTask]);
+                    if ( isRightAnswer(result['rows'], taskAnswer['rows']) ) {
+                        nextTask();  // на след. задачу
+                    };
+                } else {
+                    //fetchTableData();
+                    // ❗️
+                    /* 
+                    INSERT INTO tablename (id, title, director, year, length_minutes) VALUES (16, 'Toy Story 4', 'El Directore', 2015, 90); 
+                    */
+                    console.log(1);
+                    const result = await db.exec(`
+                        BEGIN;
+                        ${sql}
+                        -- Делаем SELECT для просмотра изменений
+                        SELECT * FROM tablename;
+
+                        -- Откатываем изменения
+                        ROLLBACK;
+                    `);
+                    // console.log("ПОЛУЧИЛИ", result);
+                    // console.log("ПОЛУЧИЛИ2", result[2]);
+                    
+                    populateTable(result[2].rows, result[2].fields);
+                    setStatus(`Запрос выполнен. Вернуто ${result[2].rows.length} строк.`)
+                }
+            } catch (error) {
+                // Используем Object.keys для итерации по ключам объекта
+                //Object.keys(error_translate).forEach(phrase => {
+                //    error.message = error.message.replace(phrase, error_translate[phrase]);
+                //});
+                //error_translate.forEach((phrase) => {error.message = error.message.replace(phrase, error_translate[phrase])})
+                setStatus(`Ошибка при выполнении запроса: ${error.message}`);
+            }
+        }
+
+        const tasksHTML = document.querySelectorAll("#group_task li");
+        let currentTask = 0;
+        async function nextTask() {
+            const currentTaskHTML = tasksHTML[currentTask]
+            currentTaskHTML.classList.add("solved");  // текущая решена
+            currentTaskHTML.textContent = "✓ " + currentTaskHTML.textContent;
+            currentTask += 1;
+            if (currentTask < tasksHTML.length) {  // не все задания решены
+                tasksHTML[currentTask].classList.remove("disabled");  // след. разблокирована
+            } else {
+                const nextLessonBtn = document.getElementById("finishBtn");
+                nextLessonBtn.textContent = "Продолжить";
+                nextLessonBtn.classList.remove("disabled");
+            }
+        }
+
+
+        sqlInput.oninput = executeSQL;
+        window.onload = () => initializeDB();
+    </script>
+</body>
+
+</html>

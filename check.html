@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Expansion Effect</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .text-container {
+            font-size: 2rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="text-container">
+        <span class="text" id="expandable-text">AB</span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const textElement = document.getElementById('expandable-text');
+            const steps = [
+                "AB", "AuBr", "AugBra", "AuguBrac", 
+                "AugusBrack", "AugustBracke", "AugustBracket"
+            ];
+            let currentIndex = 0;
+            let timeoutId;
+
+            function expandText() {
+                if (currentIndex < steps.length - 1) {
+                    currentIndex++;
+                    textElement.textContent = steps[currentIndex];
+                    timeoutId = setTimeout(expandText, 80);
+                }
+            }
+
+            function cutText() {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    textElement.textContent = steps[currentIndex];
+                    timeoutId = setTimeout(cutText, 80);
+                }
+            }
+
+            textElement.addEventListener('mouseover', function() {
+                clearTimeout(timeoutId);
+                expandText();
+            });
+
+            textElement.addEventListener('mouseout', function() {
+                clearTimeout(timeoutId);
+                cutText();
+            });
+        });
+    </script>
+</body>
+</html>
